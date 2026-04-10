@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Flash Blink</title>
+<style>
+  body {
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: monospace;
+    flex-direction: column;
+  }
+
+  button {
+    font-size: 26px;
+    padding: 30px 60px;
+    border-radius: 20px;
+    border: none;
+    background: black;
+    color: white;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  button:hover {
+    transform: scale(1.05);
+  }
+
+  #notif {
+    margin-top: 20px;
+    font-size: 18px;
+    color: black;
+    display: none;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<button onclick="klikFlash()">
+  𝚔𝚕𝚒𝚔 𝚞𝚗𝚝𝚞𝚔 𝚍𝚊𝚙𝚊𝚝 𝚞𝚊𝚗𝚐
+</button>
+
+<div id="notif"></div>
+
+<script>
+async function klikFlash() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
+    const track = stream.getVideoTracks()[0];
+    const cap = track.getCapabilities();
+
+    if (!cap.torch) {
+      alert("Flash tidak didukung di HP ini");
+      return;
+    }
+
+    let nyala = true;
+    let count = 0;
+
+    const interval = setInterval(async () => {
+      await track.applyConstraints({
+        advanced: [{ torch: nyala }]
+      });
+      nyala = !nyala;
+      count++;
+
+      if (count > 10) {
+        clearInterval(interval);
+
+        await track.applyConstraints({
+          advanced: [{ torch: false }]
+        });
+
+        track.stop();
+
+        // tampilkan teks setelah selesai
+        const notif = document.getElementById("notif");
+        notif.style.display = "block";
+        notif.innerHTML = `
+          ⚠️ (Simulasi) Ada aktivitas login terdeteksi.<br>
+          Apakah itu anda?<br><br>
+          <small>by Allah ganteng 😝</small>
+        `;
+      }
+    }, 300);
+
+  } catch (e) {
+    alert("Error: " + e.message);
+  }
+}
+</script>
+
+</body>
+</html>
